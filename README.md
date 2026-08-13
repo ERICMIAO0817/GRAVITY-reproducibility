@@ -7,6 +7,8 @@ the GRAVITY study.
 
 - `fig2/`: simulation benchmark panels and BATC robustness analysis.
 - `fig3/`: embryonic brain and cell-cycle case-study panels.
+- `fig4/`: mouse pancreatic development, dynamic gene importance and
+  perturbation panels.
 
 Each subdirectory contains a `plot.py` script that writes its panel to an
 `outputs/` directory. The corresponding `inputs/` directory contains the
@@ -33,6 +35,9 @@ python fig3/fig3a/plot.py
 python fig3/fig3c/plot.py
 python fig3/fig3d/calculate.py
 python fig3/fig3d/plot.py
+python fig4/fig4d/plot.py
+python fig4/fig4e/plot.py
+python fig4/fig4g/plot.py
 ```
 
 PNG figure assets are versioned directly in Git.
