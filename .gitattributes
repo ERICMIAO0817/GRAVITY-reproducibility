@@ -1,0 +1,2 @@
+# PNG assets in this public-fork branch are stored directly in Git because
+# GitHub does not permit a public fork to upload new LFS objects.
