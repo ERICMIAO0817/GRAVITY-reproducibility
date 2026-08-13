@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Reproduce Fig. 3c from the published scEU-seq kinetic-rate table.
-
-The source table remains outside this repository. Point ``--work-root`` to a
-GRAVITY work directory containing ``fig3_work/inputs/sceu``.
-"""
+"""Reproduce Fig. 3c from the bundled scEU-seq kinetic-rate table."""
 
 from __future__ import annotations
 
@@ -59,12 +55,17 @@ def draw_gene(axis: plt.Axes, table: pd.DataFrame, category: str, gene: str, sho
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--work-root", type=Path, required=True)
-    parser.add_argument("--output", type=Path, default=Path("outputs/fig3c.png"))
+    panel_dir = Path(__file__).resolve().parent
+    parser.add_argument(
+        "--input",
+        type=Path,
+        default=panel_dir / "inputs" / "aax3072_table-s1.csv",
+        help="Published scEU-seq kinetic-rate table.",
+    )
+    parser.add_argument("--output", type=Path, default=panel_dir / "outputs" / "fig3c.png")
     args = parser.parse_args()
 
-    table_path = args.work_root / "fig3_work" / "inputs" / "sceu" / "aax3072_table-s1.csv"
-    table = pd.read_csv(table_path, skiprows=1)
+    table = pd.read_csv(args.input, skiprows=1)
 
     figure = plt.figure(figsize=(12, 7), dpi=300)
     grid = figure.add_gridspec(2, 2, width_ratios=(1.05, 1.65), wspace=0.35, hspace=0.38)

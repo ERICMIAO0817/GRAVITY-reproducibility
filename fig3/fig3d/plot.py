@@ -17,8 +17,9 @@ LABELS = ("Cooperative", "Neutral", "Destabilizing")
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-dir", type=Path, default=Path("outputs"))
-    parser.add_argument("--output", type=Path, default=Path("outputs/fig3d.png"))
+    panel_dir = Path(__file__).resolve().parent
+    parser.add_argument("--input-dir", type=Path, default=panel_dir / "outputs")
+    parser.add_argument("--output", type=Path, default=panel_dir / "outputs" / "fig3d.png")
     args = parser.parse_args()
 
     summary = pd.read_csv(args.input_dir / "fig3d_summary.csv").set_index("method")

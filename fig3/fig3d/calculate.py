@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Compute Fig. 3d rate-cosine labels from archived scEU-seq model outputs."""
+"""Compute Fig. 3d rate-cosine labels from archived scEU-seq model outputs.
+
+By default this script rebuilds the figure tables from the bundled per-gene
+calculation cache.  Supplying ``--work-root`` reruns the full calculation from
+the archived H5AD inputs.
+"""
 
 from __future__ import annotations
 
@@ -70,9 +75,55 @@ def top_dynamic_genes(adata: ad.AnnData, cells: pd.Index, genes: list[str], proc
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--work-root", type=Path, required=True)
-    parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
+    panel_dir = Path(__file__).resolve().parent
+    parser.add_argument(
+        "--work-root",
+        type=Path,
+        help="Directory containing fig3_work/inputs for a full H5AD-based recalculation.",
+    )
+    parser.add_argument(
+        "--cached-scores",
+        type=Path,
+        default=panel_dir / "inputs" / "kinetic_cosine_scores.csv",
+        help="Bundled per-gene cache used when --work-root is omitted.",
+    )
+    parser.add_argument("--output-dir", type=Path, default=panel_dir / "outputs")
     args = parser.parse_args()
+
+    output_dir = args.output_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
+    if args.work_root is None:
+        scores = pd.read_csv(args.cached_scores)
+        required = {"method", "truth_label", "predicted_label", "truth_cosine", "predicted_cosine"}
+        missing = sorted(required - set(scores.columns))
+        if missing:
+            raise ValueError(f"Cached score table is missing columns: {missing}")
+        metrics = []
+        for method, subset in scores.groupby("method", sort=False):
+            metrics.append(
+                {
+                    "method": method,
+                    "label_agreement_count": int((subset["truth_label"] == subset["predicted_label"]).sum()),
+                    "cosine_spearman": float(spearmanr(subset["truth_cosine"], subset["predicted_cosine"]).statistic),
+                }
+            )
+            confusion = pd.crosstab(subset["truth_label"], subset["predicted_label"]).reindex(
+                index=LABELS, columns=LABELS, fill_value=0
+            )
+            confusion.to_csv(output_dir / f"{method.lower()}_label_confusion.csv")
+        scores.to_csv(output_dir / "kinetic_cosine_scores.csv", index=False)
+        pd.DataFrame(metrics).to_csv(output_dir / "fig3d_summary.csv", index=False)
+        (output_dir / "calculation_manifest.json").write_text(
+            json.dumps(
+                {
+                    "n_genes": int(scores["gene"].nunique()),
+                    "gene_selection": "archived top 100 absolute expression-process Spearman scores in CellDancer",
+                    "source": "bundled per-gene calculation cache",
+                },
+                indent=2,
+            )
+        )
+        return
 
     source = args.work_root / "fig3_work" / "inputs"
     table = pd.read_csv(source / "sceu" / "aax3072_table-s1.csv", skiprows=1)
@@ -120,8 +171,6 @@ def main() -> None:
         )
 
     scores = pd.concat(records, ignore_index=True)
-    output_dir = args.output_dir
-    output_dir.mkdir(parents=True, exist_ok=True)
     scores.to_csv(output_dir / "kinetic_cosine_scores.csv", index=False)
     pd.DataFrame(metrics).to_csv(output_dir / "fig3d_summary.csv", index=False)
     for method in ("GRAVITY", "CellDancer"):

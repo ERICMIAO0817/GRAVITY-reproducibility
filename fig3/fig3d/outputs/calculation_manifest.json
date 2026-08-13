@@ -1,5 +1,5 @@
 {
-  "n_cells": 2793,
   "n_genes": 100,
-  "gene_selection": "top 100 absolute expression-process Spearman scores in CellDancer"
+  "gene_selection": "archived top 100 absolute expression-process Spearman scores in CellDancer",
+  "source": "bundled per-gene calculation cache"
 }
