@@ -23,9 +23,10 @@ python fig2/fig2b/plot.py
 python fig3/fig3a/plot.py
 ```
 
-PNG figure assets are versioned with Git LFS. Install and initialize Git LFS
-before cloning or contributing:
+PNG figure assets are versioned directly in Git.
 
-```bash
-git lfs install
-```
+## Repository preparation
+
+Codex assisted with organizing the reproducibility directory and its figure
+rendering scripts. All analyses, source data and scientific results originate
+from the GRAVITY study.
